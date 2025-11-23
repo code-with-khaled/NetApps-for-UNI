@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:network_apps/viewmodels/auth_viewmodel.dart';
+import 'package:network_apps/views/auth/auth_screen.dart';
+import 'package:network_apps/views/home/home_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
     MultiProvider(
-      providers: [
-        // Add your providers here
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => AuthViewModel())],
       child: const MainApp(),
     ),
   );
@@ -17,8 +18,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+    return MaterialApp(
+      home: AuthScreen(),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/auth': (context) => AuthScreen(),
+      },
     );
   }
 }
