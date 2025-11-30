@@ -10,15 +10,22 @@ class AuthViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      await _authService.login(email, password);
-      _errorMessage = null;
+      final success = await _authService.login(email, password);
+
+      if (!success) {
+        _errorMessage = "Login failed";
+      }
+
+      return success;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Something went wrong";
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -40,15 +47,21 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> sendOtp(String otp) async {
+  Future<bool> sendOtp(String otp) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      await _authService.sendOtp(otp);
-      _errorMessage = null;
+      final success = await _authService.sendOtp(otp);
+
+      if (!success) {
+        _errorMessage = "OTP verification failed";
+      }
+
+      return success;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = "Something went wrong";
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -106,10 +106,16 @@ class _LoginBodyState extends State<LoginBody> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // authVM.login(emailController.text, passwordController.text);
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        widget.onLoginSuccess();
+                        bool success = await authVM.login(
+                          emailController.text,
+                          passwordController.text,
+                        );
+
+                        if (success) {
+                          widget.onLoginSuccess();
+                        }
                       }
                     },
                     child: Text("Login"),

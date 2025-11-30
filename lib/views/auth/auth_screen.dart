@@ -20,6 +20,12 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
+  void backToLogin() {
+    setState(() {
+      authMode = AuthMode.login;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,13 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
           SliverToBoxAdapter(
             child: authMode == AuthMode.login
                 ? LoginBody(onLoginSuccess: goToOtp)
-                : OtpScreen(
-                    onBackToLogin: () {
-                      setState(() {
-                        authMode = AuthMode.login;
-                      });
-                    },
-                  ),
+                : OtpScreen(onBackToLogin: backToLogin),
           ),
         ],
       ),
