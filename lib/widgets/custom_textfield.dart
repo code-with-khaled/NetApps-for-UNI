@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? suffix;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
+  final FormFieldSetter<String>? onSaved;
 
   const CustomTextField({
     super.key,
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
     this.suffix,
     this.validator,
     this.onChanged,
+    this.onSaved,
   });
 
   @override
@@ -59,6 +61,7 @@ class CustomTextField extends StatelessWidget {
       obscureText: obsecure ?? false,
       validator: validator,
       onChanged: onChanged,
+      onSaved: onSaved,
     );
   }
 }

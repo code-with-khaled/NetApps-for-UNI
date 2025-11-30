@@ -19,6 +19,20 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.deepPurple),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadiusGeometry.circular(6),
+                side: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
+      ),
       home: AuthScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),

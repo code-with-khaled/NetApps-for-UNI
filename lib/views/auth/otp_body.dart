@@ -32,7 +32,7 @@ class _OtpScreenState extends State<OtpScreen> {
     _startTimer();
   }
 
-  void _startTimer([int seconds = 10]) {
+  void _startTimer([int seconds = 300]) {
     _timer?.cancel();
     setState(() {
       remainingSeconds = seconds;
@@ -149,19 +149,25 @@ class _OtpScreenState extends State<OtpScreen> {
             const SizedBox(height: 32),
 
             // Verify button
-            ElevatedButton(
-              onPressed: () {
-                final otp = getOtp();
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final otp = getOtp();
 
-                // authVM.sendOtp(otp);
+                      // authVM.sendOtp(otp);
 
-                Navigator.of(context).pushReplacementNamed('/home');
+                      Navigator.of(context).pushReplacementNamed('/home');
 
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text("Entered OTP: $otp")));
-              },
-              child: const Text("Verify & Continue"),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Entered OTP: $otp")),
+                      );
+                    },
+                    child: const Text("Verify & Continue"),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 16),

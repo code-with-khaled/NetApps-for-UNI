@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:network_apps/models/complaint.dart';
+import 'package:network_apps/utils/helpers.dart';
+import 'package:network_apps/views/complaints/complaint_details_screen.dart';
 
-class Complaint extends StatelessWidget {
-  const Complaint({super.key});
+class ComplaintCard extends StatelessWidget {
+  final Complaint complaint;
+
+  const ComplaintCard({super.key, required this.complaint});
 
   @override
   Widget build(BuildContext context) {
-    String status = "new";
+    String status = complaint.status;
 
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Colors.black12),
         borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -22,46 +35,60 @@ class Complaint extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "CMP_serial_number",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                complaint.referenceNumber,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: _getStatusBgColor(status),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   status,
-                  style: TextStyle(color: _getStatusColor(status)),
+                  style: TextStyle(
+                    color: _getStatusColor(status),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 12),
 
-          Text("complaint_type", style: TextStyle(fontWeight: FontWeight.w500)),
+          Text(complaint.type, style: TextStyle(fontWeight: FontWeight.w500)),
           SizedBox(height: 4),
 
-          Text(
-            "government_department",
-            style: TextStyle(color: Colors.grey.shade700),
-          ),
+          Text(complaint.entity, style: TextStyle(color: Colors.grey.shade700)),
           SizedBox(height: 8),
 
           Divider(color: Colors.grey.shade200),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ComplaintDetailsScreen(
+                        complaintId: complaint.id,
+                        initialComplaint: complaint,
+                      ),
+                    ),
+                  );
+                },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
                   ),
-                  minimumSize: const Size(0, 0),
+                  minimumSize: Size.zero,
+                  tapTargetSize:
+                      MaterialTapTargetSize.shrinkWrap, // tighter touch area
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -79,7 +106,7 @@ class Complaint extends StatelessWidget {
                 ),
               ),
               Text(
-                "complaint_date",
+                Helpers.formatDate(complaint.createdAt),
                 style: TextStyle(color: Colors.grey.shade600),
               ),
             ],
