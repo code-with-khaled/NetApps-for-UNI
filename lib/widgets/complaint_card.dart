@@ -10,7 +10,7 @@ class ComplaintCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String status = complaint.status;
+    String status = complaint.status!;
 
     return Container(
       padding: EdgeInsets.all(12),
@@ -35,19 +35,19 @@ class ComplaintCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                complaint.referenceNumber,
+                complaint.referenceNumber!,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _getStatusBgColor(status),
+                  color: Helpers.getStatusBgColor(status),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   status,
                   style: TextStyle(
-                    color: _getStatusColor(status),
+                    color: Helpers.getStatusColor(status),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -75,7 +75,7 @@ class ComplaintCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ComplaintDetailsScreen(
-                        complaintId: complaint.id,
+                        complaintId: complaint.id!,
                         initialComplaint: complaint,
                       ),
                     ),
@@ -106,7 +106,7 @@ class ComplaintCard extends StatelessWidget {
                 ),
               ),
               Text(
-                Helpers.formatDate(complaint.createdAt),
+                Helpers.formatDate(complaint.createdAt!),
                 style: TextStyle(color: Colors.grey.shade600),
               ),
             ],
@@ -114,31 +114,5 @@ class ComplaintCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-        return Colors.blue;
-      case 'in progress':
-        return Colors.orange;
-      case 'resolved':
-        return Colors.green;
-      default:
-        return Colors.red;
-    }
-  }
-
-  Color _getStatusBgColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-        return Colors.blue.shade100;
-      case 'in progress':
-        return Colors.orange.shade100;
-      case 'resolved':
-        return Colors.green.shade100;
-      default:
-        return Colors.red.shade100;
-    }
   }
 }

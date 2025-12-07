@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/attachment.dart';
 import 'package:network_apps/models/complaint.dart';
 import 'package:network_apps/utils/constants.dart';
@@ -38,8 +40,25 @@ class ComplaintService {
     }
   }
 
-  Future<void> submitComplaint(Complaint complaint) async {
-    final response = await _dio.post('/complaints', data: complaint.toJson());
+  Future<void> submitComplaint(
+    Complaint complaint,
+    List<PlatformFile> files,
+    List<XFile> images,
+  ) async {
+    final formData = FormData.fromMap({
+      'type': complaint.type,
+      'entity': complaint.entity,
+      'location': complaint.location,
+      'description': complaint.description,
+      'attachments': [
+        for (var file in files)
+          await MultipartFile.fromFile(file.path!, filename: file.name),
+        for (var image in images)
+          await MultipartFile.fromFile(image.path, filename: image.name),
+      ],
+    });
+
+    final response = await _dio.post('/complaints', data: formData);
 
     if (response.statusCode != 201) {
       throw Exception('Failed to submit complaint');

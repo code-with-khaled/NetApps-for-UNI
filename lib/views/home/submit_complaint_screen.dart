@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:network_apps/models/complaint.dart';
+import 'package:network_apps/utils/helpers.dart';
+import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
 import 'package:network_apps/widgets/custom_textfield.dart';
-import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class SubmitComplaintScreen extends StatefulWidget {
   const SubmitComplaintScreen({super.key});
@@ -53,22 +56,43 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      var logger = Logger();
+      final vm = context.read<SubmitComplaintViewModel>();
 
-      logger.i("Type: $_type");
-      logger.i("Entity: $_selectedEntity");
-      logger.i("Location: $_location");
-      logger.i("Description: $_description");
-      logger.i("Files: ${_files.map((f) => f.name).toList()}");
-      logger.i("Images: ${_images.map((i) => i.path).toList()}");
+      final complaint = Complaint(
+        type: _type,
+        entity: _selectedEntity!,
+        location: _location,
+        description: _description,
+      );
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Complaint submitted!")));
+      await vm.submitComplaint(complaint, _files, _images);
+
+      if (!mounted) return;
+
+      if (vm.errorMessage != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: ${vm.errorMessage}")));
+      }
+
+      if (vm.success) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Complaint submitted!")));
+
+        setState(() {
+          _typeController.clear();
+          _locationController.clear();
+          _descriptionController.clear();
+          _selectedEntity = null;
+          _files.clear();
+          _images.clear();
+        });
+      }
     }
   }
 
@@ -211,8 +235,33 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
             if (_files.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: _files.map((f) => Text("📄 ${f.name}")).toList(),
+                children: _files
+                    .map(
+                      (f) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Helpers.getFileIcon(f.extension),
+                              color: Helpers.getFileIconColor(f.extension),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(f.name)),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _files.remove(f);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
+            SizedBox(height: 8),
 
             // Preview images
             if (_images.isNotEmpty)
@@ -220,14 +269,42 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: _images.map((img) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(img.path),
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
+                  return Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(img.path),
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _images.remove(img);
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(4),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }).toList(),
               ),

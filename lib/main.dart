@@ -33,7 +33,7 @@ class MainApp extends StatelessWidget {
           ),
         ),
       ),
-      home: AuthScreen(),
+      home: HomeScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
         '/auth': (context) => AuthScreen(),

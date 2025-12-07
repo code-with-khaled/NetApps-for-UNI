@@ -1,25 +1,25 @@
 import 'package:network_apps/models/attachment.dart';
 
 class Complaint {
-  final int id;
-  final String referenceNumber;
+  final int? id;
+  final String? referenceNumber;
   final String type;
   final String entity;
   final String location;
   final String description;
-  final DateTime createdAt;
-  final String status;
+  final DateTime? createdAt;
+  final String? status;
   final List<Attachment> attachments;
 
   Complaint({
-    required this.id,
-    required this.referenceNumber,
+    this.id,
+    this.referenceNumber,
     required this.type,
     required this.location,
     required this.entity,
     required this.description,
-    required this.createdAt,
-    required this.status,
+    this.createdAt,
+    this.status,
     this.attachments = const [],
   });
 

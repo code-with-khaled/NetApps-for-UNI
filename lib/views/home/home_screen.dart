@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
 import 'package:network_apps/views/home/complaints_screen.dart';
 import 'package:network_apps/views/home/notifications_screen.dart';
 import 'package:network_apps/views/home/submit_complaint_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // Screens for each tab
   final List<Widget> _screens = [
     const ComplaintsScreen(),
-    const SubmitComplaintScreen(),
+    ChangeNotifierProvider(
+      create: (_) => SubmitComplaintViewModel(),
+      child: const SubmitComplaintScreen(),
+    ),
     const NotificationsScreen(),
   ];
 

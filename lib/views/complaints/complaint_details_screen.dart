@@ -1,12 +1,16 @@
 // ignore_for_file: unused_import
 
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/complaint.dart';
 import 'package:network_apps/utils/helpers.dart';
 import 'package:network_apps/viewmodels/complaint_detail_viewmodel.dart';
 import 'package:provider/provider.dart';
 
-class ComplaintDetailsScreen extends StatelessWidget {
+class ComplaintDetailsScreen extends StatefulWidget {
   final int complaintId;
   final Complaint? initialComplaint;
 
@@ -15,6 +19,33 @@ class ComplaintDetailsScreen extends StatelessWidget {
     required this.complaintId,
     this.initialComplaint,
   });
+
+  @override
+  State<ComplaintDetailsScreen> createState() => _ComplaintDetailsScreenState();
+}
+
+class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
+  final List<PlatformFile> _files = [];
+  final List<XFile> _images = [];
+
+  Future<void> _pickFiles() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      setState(() {
+        _files.addAll(result.files);
+      });
+    }
+  }
+
+  Future<void> _pickImages() async {
+    final ImagePicker picker = ImagePicker();
+    final result = await picker.pickMultiImage();
+    if (result.isNotEmpty) {
+      setState(() {
+        _images.addAll(result);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +196,7 @@ class ComplaintDetailsScreen extends StatelessWidget {
     //   ),
     // );
 
-    final complaint = initialComplaint!;
+    final complaint = widget.initialComplaint!;
 
     // ignore: unused_local_variable
     final photos = complaint.attachments
@@ -191,7 +222,7 @@ class ComplaintDetailsScreen extends StatelessWidget {
             ),
             SizedBox(height: 4),
 
-            Text(complaint.referenceNumber, style: TextStyle(fontSize: 12)),
+            Text(complaint.referenceNumber!, style: TextStyle(fontSize: 12)),
           ],
         ),
       ),
@@ -209,19 +240,19 @@ class ComplaintDetailsScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getStatusBgColor(complaint.status),
+                    color: Helpers.getStatusBgColor(complaint.status!),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    complaint.status,
+                    complaint.status!,
                     style: TextStyle(
-                      color: _getStatusColor(complaint.status),
+                      color: Helpers.getStatusColor(complaint.status!),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 Text(
-                  "Submitted on ${Helpers.formatDate(complaint.createdAt)}",
+                  "Submitted on ${Helpers.formatDate(complaint.createdAt!)}",
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
                 ),
               ],
@@ -402,7 +433,9 @@ class ComplaintDetailsScreen extends StatelessWidget {
                                   return ListTile(
                                     leading: Icon(
                                       Helpers.getFileIcon(file.type),
-                                      color: _getFileIconColor(file.type),
+                                      color: Helpers.getFileIconColor(
+                                        file.type,
+                                      ),
                                     ),
                                     title: Text(file.fileName),
                                     subtitle: Text(file.type.toUpperCase()),
@@ -457,7 +490,148 @@ class ComplaintDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  // SizedBox(height: 20),
+                  SizedBox(height: 8),
+
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Add Additional Attachments",
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _pickFiles,
+                                icon: const Icon(Icons.attach_file),
+                                label: const Text("Add Files"),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _pickImages,
+                                icon: const Icon(Icons.image),
+                                label: const Text("Add Photos"),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Preview files
+                        if (_files.isNotEmpty)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _files
+                                .map(
+                                  (f) => Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Helpers.getFileIcon(f.extension),
+                                          color: Helpers.getFileIconColor(
+                                            f.extension,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(f.name)),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _files.remove(f);
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        SizedBox(height: 8),
+
+                        // Preview images
+                        if (_images.isNotEmpty)
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _images.map((img) {
+                              return Stack(
+                                alignment: Alignment.topRight,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(img.path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 4,
+                                    top: 4,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _images.remove(img);
+                                        });
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        SizedBox(height: 8),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // TODO: handle attachments addition
+                                },
+                                child: Text("Submit Attachments"),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -465,50 +639,5 @@ class ComplaintDetailsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-        return Colors.blue;
-      case 'in progress':
-        return Colors.orange;
-      case 'resolved':
-        return Colors.green;
-      default:
-        return Colors.red;
-    }
-  }
-
-  Color _getStatusBgColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-        return Colors.blue.shade100;
-      case 'in progress':
-        return Colors.orange.shade100;
-      case 'resolved':
-        return Colors.green.shade100;
-      default:
-        return Colors.red.shade100;
-    }
-  }
-
-  Color _getFileIconColor(String fileType) {
-    switch (fileType.toLowerCase()) {
-      case 'pdf':
-        return Colors.red;
-      case 'doc':
-      case 'docx':
-        return Colors.blue;
-      case 'xls':
-      case 'xlsx':
-        return Colors.green;
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
   }
 }
