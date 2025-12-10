@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
+import 'package:network_apps/viewmodels/auth_viewmodel.dart';
+
 import 'package:network_apps/views/home/complaints_screen.dart';
 import 'package:network_apps/views/home/notifications_screen.dart';
 import 'package:network_apps/views/home/submit_complaint_screen.dart';
@@ -24,10 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Screens for each tab
   final List<Widget> _screens = [
     const ComplaintsScreen(),
-    ChangeNotifierProvider(
-      create: (_) => SubmitComplaintViewModel(),
-      child: const SubmitComplaintScreen(),
-    ),
+    const SubmitComplaintScreen(),
     const NotificationsScreen(),
   ];
 
@@ -35,6 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void returnToAuth() {
+    Navigator.of(context).pushNamedAndRemoveUntil('/auth', (route) => false);
+  }
+
+  void showError(String? errorMessage) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
   }
 
   @override
@@ -47,11 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              // TODO: call your AuthViewModel.logout() or clear session
-              Navigator.pushReplacementNamed(context, '/auth');
+          Consumer<AuthViewModel>(
+            builder: (context, authVM, _) {
+              return IconButton(
+                icon: authVM.isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.logout, color: Colors.white),
+                onPressed: authVM.isLoading
+                    ? null
+                    : () async {
+                        final success = await authVM.logout();
+                        if (!success) {
+                          showError(authVM.errorMessage);
+                        }
+                        if (success && mounted) {
+                          returnToAuth();
+                        }
+                      },
+              );
             },
           ),
         ],

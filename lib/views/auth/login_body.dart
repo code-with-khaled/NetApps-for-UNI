@@ -27,6 +27,16 @@ class _LoginBodyState extends State<LoginBody> {
     });
   }
 
+  void gotoHome() {
+    Navigator.of(context).pushNamedAndRemoveUntil("/home", (route) => false);
+  }
+
+  void showError(String? errorMessage) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
+  }
+
   @override
   Widget build(BuildContext context) {
     final authVM = Provider.of<AuthViewModel>(context);
@@ -58,6 +68,7 @@ class _LoginBodyState extends State<LoginBody> {
                 fontSize: 12,
               ),
             ),
+            SizedBox(height: 5),
             CustomTextField(
               prefixIcon: Icon(Icons.person),
               hintText: "number or email",
@@ -65,7 +76,7 @@ class _LoginBodyState extends State<LoginBody> {
               validator: (val) =>
                   val == null || val.isEmpty ? "Required" : null,
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 12),
 
             Text(
               "Password",
@@ -75,6 +86,7 @@ class _LoginBodyState extends State<LoginBody> {
                 fontSize: 12,
               ),
             ),
+            SizedBox(height: 5),
             CustomTextField(
               prefixIcon: Icon(Icons.lock),
               hintText: "password",
@@ -113,8 +125,12 @@ class _LoginBodyState extends State<LoginBody> {
                           passwordController.text,
                         );
 
-                        if (success) {
-                          widget.onLoginSuccess();
+                        if (!success) {
+                          showError(authVM.errorMessage);
+                        }
+
+                        if (success && mounted) {
+                          gotoHome();
                         }
                       }
                     },
@@ -125,43 +141,39 @@ class _LoginBodyState extends State<LoginBody> {
             ),
             SizedBox(height: 8),
 
-            if (authVM.errorMessage != null)
-              Text(authVM.errorMessage!, style: TextStyle(color: Colors.red)),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text("OR"),
-                ),
-                Expanded(child: Divider()),
-              ],
+            // Register
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Don't have an account? "),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/register');
+                    },
+                    style: ButtonStyle(
+                      foregroundColor: WidgetStateProperty.resolveWith(
+                        (states) => Colors.deepPurple,
+                      ),
+                      padding: WidgetStateProperty.all(EdgeInsets.all(2)),
+                      minimumSize: WidgetStateProperty.all(const Size(0, 0)),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text("Create Account"),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 8),
 
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // authVM.signUp(emailController.text, passwordController.text);
-                      if (_formKey.currentState!.validate()) {
-                        widget.onLoginSuccess();
-                      }
-                    },
-                    child: Text("Sign Up"),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 40),
-
             Container(
               padding: EdgeInsets.all(16),
-              color: Colors.deepPurple.shade100,
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.deepPurple.shade100),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

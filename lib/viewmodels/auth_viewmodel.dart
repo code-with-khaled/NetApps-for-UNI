@@ -24,7 +24,7 @@ class AuthViewModel extends ChangeNotifier {
 
       return success;
     } catch (e) {
-      _errorMessage = "Something went wrong";
+      _errorMessage = e.toString();
       return false;
     } finally {
       _isLoading = false;
@@ -32,15 +32,31 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> signUp(String email, String password) async {
+  Future<bool> register(
+    String name,
+    String email,
+    String password,
+    String confirmedPassword,
+  ) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      await _authService.signUp(email, password);
-      _errorMessage = null;
+      final success = await _authService.register(
+        name,
+        email,
+        password,
+        confirmedPassword,
+      );
+
+      if (!success) {
+        _errorMessage = null;
+      }
+
+      return success;
     } catch (e) {
       _errorMessage = e.toString();
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -60,7 +76,7 @@ class AuthViewModel extends ChangeNotifier {
 
       return success;
     } catch (e) {
-      _errorMessage = "Something went wrong";
+      _errorMessage = e.toString();
       return false;
     } finally {
       _isLoading = false;
@@ -68,7 +84,24 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
-    await _authService.logout();
+  Future<bool> logout() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final success = await _authService.logout();
+
+      if (!success) {
+        _errorMessage = "Logout failed";
+      }
+
+      return success;
+    } catch (e) {
+      _errorMessage = "Somthing went wrong";
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

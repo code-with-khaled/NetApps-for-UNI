@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:network_apps/utils/authmode.dart';
 import 'package:network_apps/views/auth/login_body.dart';
 import 'package:network_apps/views/auth/otp_body.dart';
 
-enum AuthMode { login, otp }
-
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final AuthMode initialMode;
+
+  const AuthScreen({super.key, required this.initialMode});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  AuthMode authMode = AuthMode.login;
+  late AuthMode authMode;
 
   void goToOtp() {
     setState(() {
@@ -24,6 +25,12 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       authMode = AuthMode.login;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    authMode = widget.initialMode;
   }
 
   @override

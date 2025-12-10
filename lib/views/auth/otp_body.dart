@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,6 +74,16 @@ class _OtpScreenState extends State<OtpScreen> {
     }
     _timer?.cancel();
     super.dispose();
+  }
+
+  void gotoHome() {
+    Navigator.of(context).pushNamedAndRemoveUntil("/home", (route) => false);
+  }
+
+  void showError(String? errorMessage) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
   }
 
   @override
@@ -156,18 +164,15 @@ class _OtpScreenState extends State<OtpScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () async {
-                      final c = context;
                       final otp = getOtp();
                       final success = await authVM.sendOtp(otp);
 
-                      if (!mounted) return;
+                      if (!success) {
+                        showError(authVM.errorMessage);
+                      }
 
-                      if (success) {
-                        Navigator.pushReplacementNamed(c, '/home');
-                      } else {
-                        ScaffoldMessenger.of(c).showSnackBar(
-                          const SnackBar(content: Text('Invalid OTP')),
-                        );
+                      if (success && mounted) {
+                        gotoHome();
                       }
                     },
                     child: const Text("Verify & Continue"),
