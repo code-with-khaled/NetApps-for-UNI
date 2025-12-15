@@ -60,7 +60,10 @@ class ComplaintCard extends StatelessWidget {
           Text(complaint.type, style: TextStyle(fontWeight: FontWeight.w500)),
           SizedBox(height: 4),
 
-          Text(complaint.entity, style: TextStyle(color: Colors.grey.shade700)),
+          Text(
+            complaint.entity.toString(),
+            style: TextStyle(color: Colors.grey.shade700),
+          ),
           SizedBox(height: 8),
 
           Divider(color: Colors.grey.shade200),
@@ -74,10 +77,8 @@ class ComplaintCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ComplaintDetailsScreen(
-                        complaintId: complaint.id!,
-                        initialComplaint: complaint,
-                      ),
+                      builder: (context) =>
+                          ComplaintDetailsScreen(complaintId: complaint.id!),
                     ),
                   );
                 },

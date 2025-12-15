@@ -23,6 +23,7 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   String _type = "";
+  // ignore: unused_field
   String? _selectedEntity;
   String _location = "";
   String _description = "";
@@ -64,7 +65,8 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
 
       final complaint = Complaint(
         type: _type,
-        entity: _selectedEntity!,
+        // entity: _selectedEntity!,
+        entity: 4,
         location: _location,
         description: _description,
       );

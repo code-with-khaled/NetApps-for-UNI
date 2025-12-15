@@ -4,12 +4,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/attachment.dart';
 import 'package:network_apps/models/complaint.dart';
 import 'package:network_apps/utils/constants.dart';
+import 'package:network_apps/utils/helpers.dart';
 
 class ComplaintService {
   final Dio _dio = Dio(BaseOptions(baseUrl: Constants.baseUrl));
 
   Future<List<Complaint>> fetchComplaints() async {
-    final response = await _dio.get('/complaints');
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final response = await _dio.get(
+      '/myComplaints',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -19,8 +26,14 @@ class ComplaintService {
     }
   }
 
-  Future<Complaint> fetchComplaintDetails(int id) async {
-    final response = await _dio.get('/complaints/$id');
+  Future<Complaint> fetchComplaintDetails(int complaintId) async {
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final response = await _dio.get(
+      '/show/$complaintId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
     if (response.statusCode == 200) {
       return Complaint.fromJson(response.data);
@@ -30,10 +43,16 @@ class ComplaintService {
   }
 
   Future<List<Attachment>> fetchComplaintAttachments(int complaintId) async {
-    final response = await _dio.get('/complaints/$complaintId/attachments');
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final response = await _dio.get(
+      '/myComplaintsAtt/$complaintId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
+      final data = response.data['attachments'] as List<dynamic>;
       return data.map((json) => Attachment.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load attachments for complaint $complaintId');
@@ -45,22 +64,46 @@ class ComplaintService {
     List<PlatformFile> files,
     List<XFile> images,
   ) async {
-    final formData = FormData.fromMap({
-      'type': complaint.type,
-      'entity': complaint.entity,
-      'location': complaint.location,
-      'description': complaint.description,
-      'attachments': [
-        for (var file in files)
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final formData = FormData();
+
+    formData.fields.addAll([
+      MapEntry('type', complaint.type),
+      MapEntry('government_entity_id', complaint.entity.toString()),
+      MapEntry('location', complaint.location),
+      MapEntry('description', complaint.description),
+    ]);
+
+    for (var file in files) {
+      formData.files.add(
+        MapEntry(
+          'attachments[]',
           await MultipartFile.fromFile(file.path!, filename: file.name),
-        for (var image in images)
+        ),
+      );
+    }
+
+    for (var image in images) {
+      formData.files.add(
+        MapEntry(
+          'attachments[]',
           await MultipartFile.fromFile(image.path, filename: image.name),
-      ],
-    });
+        ),
+      );
+    }
 
-    final response = await _dio.post('/complaints', data: formData);
+    final response = await _dio.post(
+      '/submitComplaint',
+      data: formData,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+        contentType: 'multipart/form-data',
+      ),
+    );
 
-    if (response.statusCode != 201) {
+    if (response.statusCode != 200) {
       throw Exception('Failed to submit complaint');
     }
   }

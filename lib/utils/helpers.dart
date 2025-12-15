@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Helpers {
   static String formatDate(DateTime date) {
@@ -71,5 +72,21 @@ class Helpers {
       default:
         return Colors.grey;
     }
+  }
+
+  static Future<String?> getAuthToken() async {
+    final FlutterSecureStorage storage = const FlutterSecureStorage();
+    return await storage.read(key: 'auth_token');
+  }
+
+  static Future<void> clearAuthToken() async {
+    final FlutterSecureStorage storage = const FlutterSecureStorage();
+    await storage.delete(key: 'auth_token');
+    await storage.delete(key: 'user_id');
+  }
+
+  static Future<String?> getUserId() async {
+    final FlutterSecureStorage storage = const FlutterSecureStorage();
+    return await storage.read(key: 'user_id');
   }
 }

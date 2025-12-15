@@ -4,7 +4,7 @@ class Complaint {
   final int? id;
   final String? referenceNumber;
   final String type;
-  final String entity;
+  final int entity;
   final String location;
   final String description;
   final DateTime? createdAt;
@@ -25,11 +25,11 @@ class Complaint {
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
     return Complaint(
-      id: json['id'],
+      id: json['complaint_id'],
       referenceNumber: json['reference_number'],
       type: json['type'],
       location: json['location'],
-      entity: json['entity'],
+      entity: json['government_entity_id'],
       description: json['description'],
       createdAt: DateTime.parse(json['created_at']),
       status: json['status'],

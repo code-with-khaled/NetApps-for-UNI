@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:network_apps/utils/constants.dart';
+import 'package:network_apps/utils/helpers.dart';
 
 class AuthService {
   final Dio _dio = Dio(
@@ -67,7 +68,7 @@ class AuthService {
 
   Future<bool> sendOtp(String otp) async {
     try {
-      final id = await getUserId();
+      final id = await Helpers.getUserId();
 
       final response = await _dio.post('/verifyEmail/$id', data: {'code': otp});
 
@@ -78,7 +79,7 @@ class AuthService {
   }
 
   Future<bool> logout() async {
-    final token = await getAuthToken();
+    final token = await Helpers.getAuthToken();
     if (token == null) throw Exception('No auth token found');
 
     final response = await _dio.post(
@@ -87,23 +88,10 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      await clearAuthToken();
+      await Helpers.clearAuthToken();
       return true;
     } else {
       throw Exception('Failed to logout');
     }
-  }
-
-  Future<String?> getAuthToken() async {
-    return await _storage.read(key: 'auth_token');
-  }
-
-  Future<void> clearAuthToken() async {
-    await _storage.delete(key: 'auth_token');
-    await _storage.delete(key: 'user_id');
-  }
-
-  Future<String?> getUserId() async {
-    return await _storage.read(key: 'user_id');
   }
 }
