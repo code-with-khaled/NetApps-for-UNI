@@ -61,7 +61,7 @@ class _LoginBodyState extends State<LoginBody> {
             SizedBox(height: 20),
 
             Text(
-              "Mobile Number or Email",
+              "Email",
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Colors.black54,
@@ -71,7 +71,7 @@ class _LoginBodyState extends State<LoginBody> {
             SizedBox(height: 5),
             CustomTextField(
               prefixIcon: Icon(Icons.person),
-              hintText: "number or email",
+              hintText: "enter your email",
               controller: emailController,
               validator: (val) =>
                   val == null || val.isEmpty ? "Required" : null,

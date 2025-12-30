@@ -107,4 +107,46 @@ class ComplaintService {
       throw Exception('Failed to submit complaint');
     }
   }
+
+  Future<void> addAttachments(
+    int complaintId,
+    List<PlatformFile> files,
+    List<XFile> images,
+  ) async {
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final formData = FormData();
+
+    for (var file in files) {
+      formData.files.add(
+        MapEntry(
+          'attachments[]',
+          await MultipartFile.fromFile(file.path!, filename: file.name),
+        ),
+      );
+    }
+
+    for (var image in images) {
+      formData.files.add(
+        MapEntry(
+          'attachments[]',
+          await MultipartFile.fromFile(image.path, filename: image.name),
+        ),
+      );
+    }
+
+    final response = await _dio.post(
+      '/addAttachment/$complaintId',
+      data: formData,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+        contentType: 'multipart/form-data',
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to submit complaint');
+    }
+  }
 }

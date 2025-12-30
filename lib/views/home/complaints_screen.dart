@@ -37,44 +37,5 @@ class ComplaintsScreen extends StatelessWidget {
         },
       ),
     );
-    // return ListView.builder(
-    //   padding: const EdgeInsets.only(top: 8, bottom: 80),
-    //   itemCount: 4,
-    //   itemBuilder: (context, index) {
-    //     return ComplaintCard(
-    //       complaint: Complaint(
-    //         id: 1,
-    //         referenceNumber: "CMP-00001",
-    //         type: "type",
-    //         location: "AlMazza-Damascus-Syria",
-    //         entity: "Ministry of Transport",
-    //         description:
-    //             "this is a description that is generated randomly just to demonstate how the description of a complaint look like.",
-    //         createdAt: DateTime.now(),
-    //         status: "resolved",
-    //         attachments: [
-    //           Attachment(
-    //             id: "id",
-    //             fileName: "fileName1",
-    //             type: "pdf",
-    //             url: "url",
-    //           ),
-    //           Attachment(
-    //             id: "id",
-    //             fileName: "fileName2",
-    //             type: "xls",
-    //             url: "url",
-    //           ),
-    //           Attachment(
-    //             id: "id",
-    //             fileName: "fileName3",
-    //             type: "docx",
-    //             url: "url",
-    //           ),
-    //         ],
-    //       ),
-    //     );
-    //   },
-    // );
   }
 }

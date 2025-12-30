@@ -125,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: 12),
 
                     Text(
-                      "Mobile Number or Email",
+                      "Email",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.black54,
@@ -135,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: 5),
                     CustomTextField(
                       prefixIcon: Icon(Icons.person),
-                      hintText: "number or email",
+                      hintText: "enter your email",
                       controller: emailController,
                       validator: (val) =>
                           val == null || val.isEmpty ? "Required" : null,
