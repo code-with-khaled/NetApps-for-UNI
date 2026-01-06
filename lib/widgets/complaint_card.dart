@@ -61,8 +61,7 @@ class ComplaintCard extends StatelessWidget {
           SizedBox(height: 4),
 
           Text(
-            // complaint.entity.toString(),
-            "Ministry of Health",
+            complaint.entity.toString(),
             style: TextStyle(color: Colors.grey.shade700),
           ),
           SizedBox(height: 8),

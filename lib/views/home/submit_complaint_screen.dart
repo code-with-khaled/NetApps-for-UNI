@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/complaint.dart';
 import 'package:network_apps/utils/helpers.dart';
+import 'package:network_apps/viewmodels/government_entity_viewmodel.dart';
 import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
 import 'package:network_apps/widgets/custom_textfield.dart';
 import 'package:provider/provider.dart';
@@ -23,20 +24,12 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   String _type = "";
-  // ignore: unused_field
   String? _selectedEntity;
   String _location = "";
   String _description = "";
 
   final List<PlatformFile> _files = [];
   final List<XFile> _images = [];
-
-  final List<String> _ministries = [
-    "Ministry of Health",
-    "Ministry of Education",
-    "Ministry of Finance",
-    "Ministry of Interior",
-  ];
 
   Future<void> _pickFiles() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: true);
@@ -65,8 +58,7 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
 
       final complaint = Complaint(
         type: _type,
-        // entity: _selectedEntity!,
-        entity: 4,
+        entity: int.parse(_selectedEntity!),
         location: _location,
         description: _description,
       );
@@ -100,6 +92,27 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => GovernmentEntitiesViewModel()..fetchEntities(),
+      child: Consumer<GovernmentEntitiesViewModel>(
+        builder: (context, vm, child) {
+          if (vm.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (vm.errorMessage != null) {
+            return Center(child: Text("Error: ${vm.errorMessage}"));
+          }
+          if (vm.entities.isEmpty) {
+            return const Center(child: Text("No government entities found."));
+          }
+
+          return buildForm(vm);
+        },
+      ),
+    );
+  }
+
+  Widget buildForm(GovernmentEntitiesViewModel vm) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -135,7 +148,7 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
               ),
             ),
             SizedBox(height: 5),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<int>(
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: "Choose the Concerned Authority",
@@ -152,10 +165,14 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              items: _ministries.map((m) {
-                return DropdownMenuItem(value: m, child: Text(m));
+              items: vm.entities.map((entity) {
+                return DropdownMenuItem(
+                  value: entity.id,
+                  child: Text(entity.name),
+                );
               }).toList(),
-              onChanged: (val) => setState(() => _selectedEntity = val),
+              onChanged: (val) =>
+                  setState(() => _selectedEntity = val.toString()),
               validator: (val) => val == null ? "Required" : null,
             ),
             const SizedBox(height: 12),

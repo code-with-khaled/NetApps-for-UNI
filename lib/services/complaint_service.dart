@@ -3,24 +3,60 @@ import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/attachment.dart';
 import 'package:network_apps/models/complaint.dart';
+import 'package:network_apps/models/government_entity.dart';
+import 'package:network_apps/models/paginated_complaints.dart';
 import 'package:network_apps/utils/constants.dart';
 import 'package:network_apps/utils/helpers.dart';
 
 class ComplaintService {
   final Dio _dio = Dio(BaseOptions(baseUrl: Constants.baseUrl));
 
-  Future<List<Complaint>> fetchComplaints() async {
+  Future<List<GovernmentEntity>> fetchGovernmentEntities() async {
+    final token = await Helpers.getAuthToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final response = await _dio.get(
+      '/government_entities',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data['governments'] as List<dynamic>;
+      return data.map((json) => GovernmentEntity.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load government entities');
+    }
+  }
+
+  // Future<List<Complaint>> fetchComplaints() async {
+  //   final token = await Helpers.getAuthToken();
+  //   if (token == null) throw Exception('No auth token found');
+
+  //   final response = await _dio.get(
+  //     '/myComplaints',
+  //     options: Options(headers: {'Authorization': 'Bearer $token'}),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> data = response.data;
+  //     return data.map((json) => Complaint.fromJson(json)).toList();
+  //   } else {
+  //     throw Exception('Failed to load complaints');
+  //   }
+  // }
+
+  Future<PaginatedComplaints> fetchComplaints({int page = 1}) async {
     final token = await Helpers.getAuthToken();
     if (token == null) throw Exception('No auth token found');
 
     final response = await _dio.get(
       '/myComplaints',
+      queryParameters: {'page': page},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((json) => Complaint.fromJson(json)).toList();
+      return PaginatedComplaints.fromJson(response.data);
     } else {
       throw Exception('Failed to load complaints');
     }
@@ -100,8 +136,13 @@ class ComplaintService {
       options: Options(
         headers: {'Authorization': 'Bearer $token'},
         contentType: 'multipart/form-data',
+        followRedirects: false,
       ),
     );
+
+    print(response.statusCode);
+    print(response.headers);
+    print(response.realUri);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to submit complaint');

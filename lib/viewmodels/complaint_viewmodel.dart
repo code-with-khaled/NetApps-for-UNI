@@ -11,13 +11,30 @@ class ComplaintViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> fetchComplaints() async {
+  int _currentPage = 1;
+  int _lastPage = 1;
+
+  bool get hasMoreComplaints => _currentPage <= _lastPage;
+
+  Future<void> fetchComplaints({bool refresh = false}) async {
+    if (isLoading) return;
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
+    if (refresh) {
+      _currentPage = 1;
+      complaints.clear();
+    }
+
     try {
-      complaints = await _complaintService.fetchComplaints();
+      final paginatedComplaints = await _complaintService.fetchComplaints(
+        page: _currentPage,
+      );
+
+      complaints.addAll(paginatedComplaints.complaints);
+      _currentPage = paginatedComplaints.currentPage + 1;
+      _lastPage = paginatedComplaints.lastPage;
     } catch (e) {
       errorMessage = e.toString();
     } finally {
