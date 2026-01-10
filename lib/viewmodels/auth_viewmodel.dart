@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:network_apps/main.dart';
 import 'package:network_apps/services/auth_service.dart';
+import 'package:network_apps/viewmodels/notification_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -18,8 +21,15 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final success = await _authService.login(email, password);
 
-      if (!success) {
-        _errorMessage = "Login failed";
+      if (success) {
+        final notificationVM = Provider.of<NotificationViewModel>(
+          navigatorKey.currentContext!,
+          listen: false,
+        );
+
+        await notificationVM.sendToken();
+      } else {
+        _errorMessage = "Invalid email or password";
       }
 
       return success;
@@ -49,8 +59,15 @@ class AuthViewModel extends ChangeNotifier {
         confirmedPassword,
       );
 
-      if (!success) {
-        _errorMessage = null;
+      if (success) {
+        final notificationVM = Provider.of<NotificationViewModel>(
+          navigatorKey.currentContext!,
+          listen: false,
+        );
+
+        await notificationVM.sendToken();
+      } else {
+        _errorMessage = "Registration failed";
       }
 
       return success;

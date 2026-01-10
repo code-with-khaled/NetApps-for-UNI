@@ -120,6 +120,8 @@ class _LoginBodyState extends State<LoginBody> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        if (authVM.isLoading) return;
+
                         bool success = await authVM.login(
                           emailController.text,
                           passwordController.text,
@@ -134,7 +136,16 @@ class _LoginBodyState extends State<LoginBody> {
                         }
                       }
                     },
-                    child: Text("Login"),
+                    child: authVM.isLoading
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text("Login"),
                   ),
                 ),
               ],

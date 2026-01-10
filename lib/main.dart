@@ -2,12 +2,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:network_apps/utils/authmode.dart';
+import 'package:network_apps/utils/notification_helper.dart';
 import 'package:network_apps/viewmodels/auth_viewmodel.dart';
+import 'package:network_apps/viewmodels/complaint_viewmodel.dart';
+import 'package:network_apps/viewmodels/notification_viewmodel.dart';
 import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
 import 'package:network_apps/views/auth/auth_screen.dart';
 import 'package:network_apps/views/auth/register_screen.dart';
 import 'package:network_apps/views/home/home_screen.dart';
 import 'package:provider/provider.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -28,7 +33,9 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => ComplaintViewModel()),
         ChangeNotifierProvider(create: (_) => SubmitComplaintViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
       ],
       child: const MainApp(),
     ),
@@ -51,6 +58,13 @@ class _MainAppState extends State<MainApp> {
 
   // Request notification permissions, get FCM token and listen to messages
   Future<void> _initNotifications() async {
+    final notificationVM = Provider.of<NotificationViewModel>(
+      context,
+      listen: false,
+    );
+
+    await NotificationHelper.initialize();
+
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     NotificationSettings settings = await messaging.requestPermission(
@@ -68,20 +82,37 @@ class _MainAppState extends State<MainApp> {
     // ignore: avoid_print
     print("FCM Token: $token");
 
-    // TODO: send token to your backend
+    if (token != null) {
+      notificationVM.setLatestToken(token);
+    }
+
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      notificationVM.setLatestToken(newToken);
+    });
 
     // Foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // ignore: avoid_print
       print('Foreground message: ${message.notification?.title}');
-      if (message.notification != null) {
-        // ignore: avoid_print
-        print('Data: ${message.notification}');
-      }
+
+      final title = message.notification?.title ?? 'No Title';
+      final body = message.notification?.body ?? 'No Body';
+
+      notificationVM.addNotification(title, body);
+
+      NotificationHelper.showNotification(title: title, body: body);
+
+      // ignore: avoid_print
+      print('Data: ${message.notification}');
     });
 
     // When the app is opened from a notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final title = message.notification?.title ?? 'No Title';
+      final body = message.notification?.body ?? 'No Body';
+
+      notificationVM.addNotification(title, body);
+
       // ignore: avoid_print
       print('Notification opened: ${message.data}');
     });
@@ -98,6 +129,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(

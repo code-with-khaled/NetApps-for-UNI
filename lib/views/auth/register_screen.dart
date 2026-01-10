@@ -206,6 +206,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: ElevatedButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
+                                if (authVM.isLoading) return;
+
                                 bool success = await authVM.register(
                                   nameController.text,
                                   emailController.text,
@@ -222,7 +224,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 }
                               }
                             },
-                            child: Text("Create Account"),
+                            child: authVM.isLoading
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text("Create Account"),
                           ),
                         ),
                       ],

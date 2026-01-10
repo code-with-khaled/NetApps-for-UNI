@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -107,7 +109,7 @@ class ComplaintService {
 
     formData.fields.addAll([
       MapEntry('type', complaint.type),
-      MapEntry('government_entity_id', complaint.entity.toString()),
+      MapEntry('government_entity_id', complaint.entity.id.toString()),
       MapEntry('location', complaint.location),
       MapEntry('description', complaint.description),
     ]);

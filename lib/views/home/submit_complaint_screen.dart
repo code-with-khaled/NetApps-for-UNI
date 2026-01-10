@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:network_apps/models/complaint.dart';
+import 'package:network_apps/models/government_entity.dart';
 import 'package:network_apps/utils/helpers.dart';
 import 'package:network_apps/viewmodels/government_entity_viewmodel.dart';
 import 'package:network_apps/viewmodels/submit_complaint_viewmodel.dart';
@@ -58,7 +59,10 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
 
       final complaint = Complaint(
         type: _type,
-        entity: int.parse(_selectedEntity!),
+        entity: GovernmentEntity(
+          id: int.parse(_selectedEntity!),
+          name: _selectedEntity!,
+        ),
         location: _location,
         description: _description,
       );

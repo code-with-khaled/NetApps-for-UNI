@@ -1,10 +1,11 @@
 import 'package:network_apps/models/attachment.dart';
+import 'package:network_apps/models/government_entity.dart';
 
 class Complaint {
   final int? id;
   final String? referenceNumber;
   final String type;
-  final int entity;
+  final GovernmentEntity entity;
   final String location;
   final String description;
   final DateTime? createdAt;
@@ -29,7 +30,7 @@ class Complaint {
       referenceNumber: json['reference_number'],
       type: json['type'],
       location: json['location'],
-      entity: json['government_entity_id'],
+      entity: GovernmentEntity.fromJson(json['government_entity']),
       description: json['description'],
       createdAt: DateTime.parse(json['created_at']),
       status: json['status'],

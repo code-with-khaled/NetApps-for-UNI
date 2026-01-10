@@ -21,9 +21,9 @@ class PaginatedComplaints {
 
     return PaginatedComplaints(
       complaints: complaintsList,
-      currentPage: json['current_page'],
-      lastPage: json['last_page'],
-      nextPageUrl: json['next_page_url'],
+      currentPage: json['meta']['current_page'],
+      lastPage: json['meta']['last_page'],
+      nextPageUrl: json['links']['next_page_url'],
     );
   }
 }
