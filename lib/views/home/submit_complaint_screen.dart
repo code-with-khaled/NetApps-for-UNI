@@ -28,6 +28,7 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
   String? _selectedEntity;
   String _location = "";
   String _description = "";
+  bool _isSubmitting = false;
 
   final List<PlatformFile> _files = [];
   final List<XFile> _images = [];
@@ -55,7 +56,13 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      if (_isSubmitting) return;
+
       final vm = context.read<SubmitComplaintViewModel>();
+
+      setState(() {
+        _isSubmitting = true;
+      });
 
       final complaint = Complaint(
         type: _type,
@@ -91,6 +98,10 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
           _images.clear();
         });
       }
+
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -336,7 +347,16 @@ class _SubmitComplaintScreenState extends State<SubmitComplaintScreen> {
 
             ElevatedButton(
               onPressed: _submitForm,
-              child: const Text("Submit Complaint"),
+              child: _isSubmitting
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text("Submit Complaint"),
             ),
           ],
         ),

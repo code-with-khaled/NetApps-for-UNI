@@ -17,7 +17,7 @@ class GovernmentEntity {
 
   factory GovernmentEntity.fromJson(Map<String, dynamic> json) {
     return GovernmentEntity(
-      id: json['id'],
+      id: json['entity_id'],
       name: json['name'],
       description: json['description'] ?? '',
       location: json['location'] ?? '',

@@ -11,6 +11,7 @@ class Complaint {
   final DateTime? createdAt;
   final String? status;
   final List<Attachment> attachments;
+  final List<ComplaintHistory> statusHistory;
 
   Complaint({
     this.id,
@@ -22,6 +23,7 @@ class Complaint {
     this.createdAt,
     this.status,
     this.attachments = const [],
+    this.statusHistory = const [],
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,9 @@ class Complaint {
       description: json['description'],
       createdAt: DateTime.parse(json['created_at']),
       status: json['status'],
+      statusHistory: (json['status_history'] as List<dynamic>? ?? [])
+          .map((item) => ComplaintHistory.fromJson(item))
+          .toList(),
     );
   }
 
@@ -47,5 +52,15 @@ class Complaint {
           .map((attachment) => attachment.toJson())
           .toList(),
     };
+  }
+}
+
+class ComplaintHistory {
+  final String? note;
+
+  ComplaintHistory({this.note});
+
+  factory ComplaintHistory.fromJson(Map<String, dynamic> json) {
+    return ComplaintHistory(note: json['note']);
   }
 }

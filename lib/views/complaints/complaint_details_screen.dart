@@ -138,7 +138,7 @@ class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
                           SizedBox(height: 8),
 
                           // Comments
-                          buildCommentsSection(complaint.id!),
+                          buildCommentsSection(complaint),
                           SizedBox(height: 8),
 
                           // Add Additional Attachments
@@ -282,15 +282,16 @@ class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
                   itemCount: photos.length,
                   itemBuilder: (context, index) {
                     final photo = photos[index];
-                    final fixedUrl = photo.url.replaceFirst('file://', '');
+                    final fixedUrl = (photo.url ?? '').replaceFirst(
+                      'file://',
+                      '',
+                    );
                     return GestureDetector(
-                      onTap: () {
-                        // TODO: open full screen preview
-                      },
+                      onTap: () {},
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
-                          "http://192.168.1.7:8000$fixedUrl",
+                          "http://172.16.31.80:8000$fixedUrl",
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -350,13 +351,9 @@ class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
                       subtitle: Text(file.type.toUpperCase()),
                       trailing: IconButton(
                         icon: const Icon(Icons.download, color: Colors.grey),
-                        onPressed: () {
-                          // TODO: handle file download or open
-                        },
+                        onPressed: () {},
                       ),
-                      onTap: () {
-                        // TODO: open file preview if supported
-                      },
+                      onTap: () {},
                     );
                   },
                 ),
@@ -366,7 +363,9 @@ class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
   }
 
   // Comments
-  Widget buildCommentsSection(int complaintId) {
+  Widget buildCommentsSection(Complaint complaint) {
+    final comments = complaint.statusHistory;
+
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -386,15 +385,49 @@ class _ComplaintDetailsScreenState extends State<ComplaintDetailsScreen> {
           ),
           SizedBox(height: 12),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Text(
-                "No comments available.",
-                style: TextStyle(color: Colors.grey),
+          // If no comments
+          if (comments.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: Text(
+                  "No comments available.",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
             ),
-          ),
+
+          // If comments exist
+          if (comments.isNotEmpty)
+            Column(
+              children: comments.map((c) {
+                return Container(
+                  margin: EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.comment,
+                        size: 18,
+                        color: Colors.grey.shade600,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          c.note ?? "",
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );

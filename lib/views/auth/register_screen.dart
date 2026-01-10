@@ -42,6 +42,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     ).showSnackBar(SnackBar(content: Text("Error: $errorMessage")));
   }
 
+  bool isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+    return emailRegex.hasMatch(email);
+  }
+
+  bool isValidPassword(String password) {
+    // Min 8 chars, at least 1 letter + 1 number
+    final passwordRegex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$');
+    return passwordRegex.hasMatch(password);
+  }
+
   @override
   Widget build(BuildContext context) {
     final authVM = Provider.of<AuthViewModel>(context);
@@ -137,8 +148,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       prefixIcon: Icon(Icons.person),
                       hintText: "enter your email",
                       controller: emailController,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? "Required" : null,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Email is required";
+                        }
+                        if (!isValidEmail(val.trim())) {
+                          return "Enter a valid email";
+                        }
+                        return null;
+                      },
                     ),
                     SizedBox(height: 12),
 
@@ -173,8 +191,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       obsecure: obsecure,
                       controller: passwordController,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? "Required" : null,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Password is required";
+                        }
+                        if (!isValidPassword(val)) {
+                          return "Min 8 chars, include letters & numbers";
+                        }
+                        return null;
+                      },
                     ),
                     SizedBox(height: 12),
 

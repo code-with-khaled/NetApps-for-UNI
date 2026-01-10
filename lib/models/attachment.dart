@@ -1,3 +1,5 @@
+import 'package:network_apps/utils/helpers.dart';
+
 class Attachment {
   final int id;
   final String? fileName;
@@ -20,6 +22,7 @@ class Attachment {
       id: json['id'],
       type: json['type'],
       url: json['file_path'],
+      fileName: Helpers.extractFileName(json['file_path']),
     );
   }
 

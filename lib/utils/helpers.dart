@@ -89,4 +89,8 @@ class Helpers {
     final FlutterSecureStorage storage = const FlutterSecureStorage();
     return await storage.read(key: 'user_id');
   }
+
+  static String extractFileName(String path) {
+    return path.split('/').last;
+  }
 }
